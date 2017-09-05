@@ -192,7 +192,7 @@ class Atoms:
     def step_nvt(self, dt, Q, temp):
         """Performs MD step in an NVT ensemble using a Nose-Hoover thermostat"""
 
-        def nose_sum(m):
+        def nose_sum():
             result = 0
             for i, element in self.enumerate():
                 m = masses[element]
@@ -216,15 +216,15 @@ class Atoms:
                 a = self.forces[i]/m
                 v = self.velocities[i]
                 self.positions[i] += v*dt + (a-z*v) * dt**2 / 2
-                # Step 4
-                self.zeta += nose_sum(m)
-                # Step 2
-                self.velocities[i] += dt/2 * (a-z*v)
+
+        # Step 4
+        self.zeta += nose_sum()
         for i, element in self.enumerate():
             if not self.fixed[i] and self.forces[i] is not None:
-                m = masses[element]
-                # Step 5
-                self.zeta += nose_sum(m)
+                # Step 2
+                self.velocities[i] += dt/2 * (a-z*v)
+        # Step 5
+        self.zeta += nose_sum()
         # ...Step 3...
         self.prev_forces = self.forces
         self.forces = None

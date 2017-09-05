@@ -165,7 +165,7 @@ Starting...""".format(T_i, T_f, dt, float(dt)/mm_ratio, steps, freq)
 def run_nvt_md(atoms, regions, dt, mm_ratio, steps, T, freq):
     """Performs a nvt, Nose-Hoover MD equilibration, using QM timestep dt and MM
      timestep dt/mm_ratio. System is kept at temperature T using a nose
-     frequency freq. 
+     frequency freq. For systems with water, a good starting frequency is 1.0.  
     """
     print """
 ========================================
@@ -215,17 +215,16 @@ Starting...""".format(T, dt, float(dt)/mm_ratio, steps, freq)
         qmThread.start()
 
         for i in xrange(mm_ratio):
-            # Rescale velocities based on MM steps
             print 'Starting MM...',
             lammps.calc_forces(mm, overlap_indexes)
-            mm.step_nvt(float(dt)/mm_ratio)
+            mm.step_nvt(float(dt)/mm_ratio, freq, T)
             print 'done.'
 
         qmThread.join()
         print 'QM done.'
         atoms.merge(mm)
         atoms.merge(qm)
-        atoms.step_nve(float(dt))
+        atoms.step_nvt(float(dt))
 
         print '   QM Temperature: {0:.1f} K'.format(qm.temp())
         print '   MM Temperature: {0:.1f} K'.format(mm.temp())

@@ -1,8 +1,6 @@
 # Author: Willis O'Leary
 
 import itertools
-from subprocess import Popen, PIPE, check_output, STDOUT
-import time
 import numpy as np
 from atoms import *
 
@@ -53,19 +51,8 @@ def calc_forces(atoms):
     p = Popen(cmd, stderr=STDOUT, stdout=PIPE,  shell=True)
     jobID = p.communicate()[0]
 
-    # Wait until completion
-    block = True
-    while block:
-        time.sleep(1)
-    
-        p = Popen('qstat -f {0}'.format(jobID), stderr=STDOUT, stdout=PIPE, shell=True)
-        jobStatus = p.communicate()[0]
-    
-        queued = 'job_state = Q' in jobStatus
-        running = 'job_state = R' in jobStatus
-    
-        if not queued and not running:
-            block = False
+    # For PBS: wait until job completes
+    block_pbs(jobID)
 
     updt(atoms, run_dir)
 

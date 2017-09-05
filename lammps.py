@@ -1,8 +1,6 @@
 # Author: Willis O'Leary
 
 import itertools
-from subprocess import Popen, PIPE, check_output, STDOUT
-import time
 import numpy as np
 from util import *
 
@@ -53,6 +51,9 @@ def calc_forces(atoms, overlap_indexes):
     cmd = 'cd {0} && ./lammps.run'.format(run_dir)
     p = Popen(cmd, stderr=STDOUT, stdout=PIPE, shell=True)
     jobID = p.communicate()[0]
+
+    # For PBS: wait until job completes
+    #block_pbs(jobID)
 
     updt(atoms, run_dir)
 

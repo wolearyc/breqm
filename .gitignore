@@ -1,6 +1,5 @@
 vasp_run/*
 lammps_run/*
-*.vasp
 *.xyz
 *.pyc
 log

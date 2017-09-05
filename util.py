@@ -1,5 +1,8 @@
 # Author: Willis O'Leary
 
+from subprocess import Popen, PIPE, check_output, STDOUT
+import time
+
 def warn(desc):
     """Prints a warning."""
     print 'WARNING: {0}'.format(desc)
@@ -7,6 +10,21 @@ def error(desc):
     """Prints an error and exits."""
     print 'ERROR: {0}'.format(desc)
     exit()
+
+def block_pbs(jobID)
+  """Blocks until PBS job with jobID is complete."""
+    block = True
+    while block:
+        time.sleep(1)
+    
+        p = Popen('qstat -f {0}'.format(jobID), stderr=STDOUT, stdout=PIPE, shell=True)
+        jobStatus = p.communicate()[0]
+    
+        queued = 'job_state = Q' in jobStatus
+        running = 'job_state = R' in jobStatus
+    
+        if not queued and not running:
+            block = False
 
 """ Atom masses."""
 masses = {'H':1.008,  'He':4.003, 'Li':6.941,  'Be':9.012182,
