@@ -19,11 +19,9 @@ timestep        0.25
 pair_style      reax/c lammps.control safezone 1.6 mincap 100
 pair_coeff      * * lammps.ffield {0}
 fix             QEQ all qeq/reax 1 0.0 10.0 1.0e-6 reax/c
-group           overlap id {1}
-
 # Neighbors
 neighbor        2.5 bin
-neigh_modify    delay 0 every 10 check no exclude group overlap overlap
+neigh_modify    delay 0 every 10 check no exclude
 
 # Dumps
 dump dump_all all custom 100 lammps.trj id type x y z fx fy fz
@@ -36,15 +34,13 @@ thermo 1000
 run 0
 """
 
-def calc_forces(atoms, overlap_indexes):
+def calc_forces(atoms, regions):
     """Sets up and runs LAMMPS calculation via a lammps.run script in the 
-    run directory. Upon completion, updates atom forces, excluding 
-    forces between atoms in the overlap, specified by overlap_indexes. 
+    run directory. Upon completion, updates atom forces.
     """
     # Input and data files
     f = open('{0}/lammps.in'.format(run_dir), 'w')
-    f.write(input_str.format(" ".join(map(str, atoms.elements)), 
-                             " ".join(map(str, overlap_indexes))))
+    f.write(input_str.format(" ".join(map(str, atoms.elements)))
     f.close()
     write_data(atoms, '{0}/lammps.data'.format(run_dir))
 
@@ -55,7 +51,7 @@ def calc_forces(atoms, overlap_indexes):
     # For PBS: wait until job completes
     #block_pbs(jobID)
 
-    updt(atoms, run_dir)
+    updt(atoms, run_dir, regions)
 
 def write_data(atoms, file):
     """Writes data to a file in lammps data format."""
@@ -88,7 +84,7 @@ def write_data(atoms, file):
 
     f.close()
 
-def updt(atoms, dir):
+def updt(atoms, dir, regions):
     """Updates data with that read from a LAMMPS trajectory file. This function
     reads the first structure entry, and expects the following dump format:
     'id type x y z fx fy fz'. 
@@ -99,10 +95,11 @@ def updt(atoms, dir):
     f = open('{0}/lammps.trj'.format(dir), 'r')
     for _ in xrange(9):
         next(f)
-    for i in xrange(len(atoms)):        
-        nums = [float(n) for n in next(f).split()]
+    for i in xrange(len(atoms)):
         atoms.positions[i] = np.array(nums[2:5])
-        atoms.forces[i] = np.array(nums[5:8]) * 4.184e-4
+        if not regions.mm_fixed(*atoms.positions[i]):       
+            nums = [float(n) for n in next(f).split()]
+            atoms.forces[i] = np.array(nums[5:8]) * 4.184e-4
     f.close()
 
 

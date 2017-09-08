@@ -37,7 +37,7 @@ LCHARG  = .FALSE.
 LWAVE   = .TRUE.         # Write WAVECAR for future calculations
 """
 
-def calc_forces(atoms):
+def calc_forces(atoms, regions):
     """Sets up and runs VASP calculation via a vasp.run script in the 
     run directory. Upon completion, updates atom forces. 
     """
@@ -54,7 +54,7 @@ def calc_forces(atoms):
     # For PBS: wait until job completes
     block_pbs(jobID)
 
-    updt(atoms, run_dir)
+    updt(atoms, run_dir, regions)
 
 def write_poscar(atoms, file):
     """Writes data to a file in POSCAR format. Uses selective dynamics in 
@@ -128,7 +128,7 @@ def read_poscar(file):
     velocities = [None] * sum(num_elements)
     return Atoms(elements, num_elements, positions, velocities, cell)
 
-def updt(atoms, dir):
+def updt(atoms, dir, regions):
     """Updates Atoms object using the CONTCAR and OUTCAR in a directory. Reads
     in forces and positions (in case of wrap around), but ignores velocity data.
     """
@@ -162,8 +162,9 @@ def updt(atoms, dir):
         line = next(f)
     next(f)
     for i in xrange(len(atoms)):
-        nums = [float(s) for s in next(f).split()]
-        atoms.forces[i] = np.array(nums[3:]) * 0.00964895
+        if not regions.qm_fixed(*atoms.positions[i]):
+            nums = [float(s) for s in next(f).split()]
+            atoms.forces[i] = np.array(nums[3:]) * 0.00964895
     f.close()
 
 

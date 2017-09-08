@@ -21,13 +21,9 @@ Interfacing with VASP and LAMMPS
 --------------------------------
 Two scripts, vasp.run and lammps.run, should be present in the running directories. These scripts should run VASP and LAMMPS, respectively. Either software can be run through PBS, though I recommend only running VASP through PBS. If running with PBS, ensure that the block_pbs function is used before the atoms are updated; this code is contained in the calc_forces functions in lammps.py and vasp.py.
 
-For LAMMPS, this tool only writes a data file ('lammps.data') and an input file ('lammps.in'). The data file comes from an Atoms object, but the input file is written by the user in string form (see lammps.py). This string should contain two format specifiers at two specific locations. The first specifier should be located when the atom order is specified in the pair_coeff command.
+For LAMMPS, this tool only writes a data file ('lammps.data') and an input file ('lammps.in'). The data file comes from an Atoms object, but the input file is written by the user in string form (see lammps.py). This string should contain a format specifier used when the atom order is specified in the pair_coeff command.
 ```
 pair_coeff      * * lammps.ffield {0}
-```
-The second specifier should be located on some group that will be frozen later.
-```
-group           frozen id {1}
 ```
 
 For VASP, this tool only writes a POSCAR and an INCAR. The POSCAR comes form an Atoms object, but the input file is written by the user in the string form (see vasp.py). This string should not contain any format specifiers, since all atom fixing is done using the 'Selective Dynamics' tag within the POSCAR.

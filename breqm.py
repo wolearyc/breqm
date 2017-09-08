@@ -121,22 +121,8 @@ Starting...""".format(T_i, T_f, dt, float(dt)/mm_ratio, steps, freq)
         atoms.update_bonding(regions.cutoffs, regions.qm_boundary)
         qm = atoms.split(regions.qm)
         qm.fix(regions.fixed_qm)
-        # Determine shared atoms (to exclude from MM forces)
-        overlap_indexes = []
-        mm_i, qm_i = 0, 0
-        while mm_i < len(mm) and qm_i < len(qm):
-            mm_merge_i = mm.merge_indexes[mm_i]
-            qm_merge_i = qm.merge_indexes[qm_i]
-            if mm_merge_i == qm_merge_i:
-                overlap_indexes.append(mm_i+1) # add 1 b/c LAMMPS
-                qm_i += 1
-                mm_i += 1
-            elif mm_merge_i > qm_merge_i:
-                qm_i += 1
-            else:
-                mm_i += 1
 
-        qmThread = Thread(target=vasp.calc_forces, args=(qm,))
+        qmThread = Thread(target=vasp.calc_forces, args=(qm,regions))
         if step % freq == 0:
             qm.rescale_velocities(T_i + (T_f-T_i) * float(step)/steps)
         print 'Starting QM...'
@@ -147,7 +133,7 @@ Starting...""".format(T_i, T_f, dt, float(dt)/mm_ratio, steps, freq)
             print 'Starting MM...',
             if (step * mm_ratio + i) % freq == 0:
                 mm.rescale_velocities(T_i + (T_f-T_i) * float(step)/steps)
-            lammps.calc_forces(mm, overlap_indexes)
+            lammps.calc_forces(mm, regions)
             mm.step_nve(float(dt)/mm_ratio)
             print 'done.'
 
@@ -195,28 +181,14 @@ Starting...""".format(T, dt, float(dt)/mm_ratio, steps, freq)
         atoms.update_bonding(regions.cutoffs, regions.qm_boundary)
         qm = atoms.split(regions.qm)
         qm.fix(regions.fixed_qm)
-        # Determine shared atoms (to exclude from MM forces)
-        overlap_indexes = []
-        mm_i, qm_i = 0, 0
-        while mm_i < len(mm) and qm_i < len(qm):
-            mm_merge_i = mm.merge_indexes[mm_i]
-            qm_merge_i = qm.merge_indexes[qm_i]
-            if mm_merge_i == qm_merge_i:
-                overlap_indexes.append(mm_i+1) # add 1 b/c LAMMPS
-                qm_i += 1
-                mm_i += 1
-            elif mm_merge_i > qm_merge_i:
-                qm_i += 1
-            else:
-                mm_i += 1
 
-        qmThread = Thread(target=vasp.calc_forces, args=(qm,))
+        qmThread = Thread(target=vasp.calc_forces, args=(qm,regions))
         print 'Starting QM...'
         qmThread.start()
 
         for i in xrange(mm_ratio):
             print 'Starting MM...',
-            lammps.calc_forces(mm, overlap_indexes)
+            lammps.calc_forces(mm, regions)
             mm.step_nvt(float(dt)/mm_ratio, freq, T)
             print 'done.'
 
