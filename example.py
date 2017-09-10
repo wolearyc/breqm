@@ -7,7 +7,10 @@ from breqm import *
 cutoffs = {'H-O' : 1.5}
 # Read in input file (vasp format)
 total = vasp.read_poscar('example_input.vasp')
-# Define BREQM regions
+# Define BREQM regions. In this example, we separate regions using
+# z intervals. Interval 0-13 is included in QM calculations. 
+# Interval 9-40 is included in MM calcuations. 9-11 is the 
+# QM boundary, while 11-13 is the MM boundary.
 regions = ZIntervalRegions((0,13), (9,40), 11, cutoffs)
 
 # Run 2 ps heating dynamics
