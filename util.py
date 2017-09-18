@@ -12,7 +12,7 @@ def error(desc):
     exit()
 
 def block_pbs(jobID)
-  """Blocks until PBS job with jobID is complete."""
+    """Blocks until PBS job with jobID is complete."""
     block = True
     while block:
         time.sleep(1)

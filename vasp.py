@@ -11,7 +11,7 @@ incar_str = """
 System = forces
 
 # Parallelization
-NPAR     = 7            # sqrt(cores)
+NPAR     = 4            # sqrt(cores)
 
 # Electronic relaxation
 GGA      = PE            # Use PBE
@@ -162,9 +162,8 @@ def updt(atoms, dir, regions):
         line = next(f)
     next(f)
     for i in xrange(len(atoms)):
-        if not regions.qm_fixed(*atoms.positions[i]):
+        if not regions.fixed_qm(*atoms.positions[i]):
             nums = [float(s) for s in next(f).split()]
             atoms.forces[i] = np.array(nums[3:]) * 0.00964895
     f.close()
-
 

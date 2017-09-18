@@ -17,17 +17,16 @@ atom_style      charge
 read_data       lammps.data
 timestep        0.25
 pair_style      reax/c lammps.control safezone 1.6 mincap 100
-
-# Format specifier is necessary! 
-pair_coeff      * * lammps.ffield {0}
-
+pair_coeff      * * lammps.ffield H O
 fix             QEQ all qeq/reax 1 0.0 10.0 1.0e-6 reax/c
+group           overlap id 7 12 17 18 23 26 30 31 32 44 45 47 49 53 57 58 59 60 69 70 73 76 77 84 92 94 95 96 99 107 111 112 115 119 124 129 131 132 133 138 142 144
+
+# Neighbors
 neighbor        2.5 bin
-neigh_modify    delay 0 every 10 check no exclude
+neigh_modify    delay 0 every 10 check no exclude group overlap overlap
 
-# Don't change the dump order!
+# Dumps
 dump dump_all all custom 100 lammps.trj id type x y z fx fy fz
-
 dump_modify dump_all sort id
 thermo_style custom step temp press ke pe etotal atoms
 thermo_modify flush yes
@@ -43,7 +42,7 @@ def calc_forces(atoms, regions):
     """
     # Input and data files
     f = open('{0}/lammps.in'.format(run_dir), 'w')
-    f.write(input_str.format(" ".join(map(str, atoms.elements)))
+    f.write(input_str.format(" ".join(map(str, atoms.elements))))
     f.close()
     write_data(atoms, '{0}/lammps.data'.format(run_dir))
 
@@ -99,9 +98,9 @@ def updt(atoms, dir, regions):
     for _ in xrange(9):
         next(f)
     for i in xrange(len(atoms)):
+        nums = [float(n) for n in next(f).split()]
         atoms.positions[i] = np.array(nums[2:5])
-        if not regions.mm_fixed(*atoms.positions[i]):       
-            nums = [float(n) for n in next(f).split()]
+        if not regions.fixed_mm(*atoms.positions[i]):       
             atoms.forces[i] = np.array(nums[5:8]) * 4.184e-4
     f.close()
 
