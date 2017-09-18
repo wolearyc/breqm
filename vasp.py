@@ -6,45 +6,11 @@ from atoms import *
 
 run_dir = 'vasp_run'  # Running directory
 
-incar_str = """
-# VASP Input File, written by Willis
-System = forces
-
-# Parallelization
-NPAR     = 4            # sqrt(cores)
-
-# Electronic relaxation
-GGA      = PE            # Use PBE
-IVDW     = 12            # Use Becke-Johnson D3
-PREC     = Normal        # Normal precision
-ENCUT    = 400           # Planewave cutoff
-NELMIN   = 4             # Several electronic steps
-EDIFF    = 1.0E-5        # Low cutoff to avoid drift
-LREAL    = A             # Use real space projections
-ISMEAR   = 1             # Smearing (default)
-SIGMA    = 0.2           # Smearing parameter (default)
-ISPIN    = 1             # Closed shell calculation
-ALGO     = Very Fast     
-ISYM     = 0             # No symmetry
-MAXMIX   = 45            # Mixing
-
-# Ionic relaxation
-NSW = 0                  # Single point calculation
-ISIF = 0                 # No (expensive) stress calculation
-
-# Output
-LCHARG  = .FALSE.        
-LWAVE   = .TRUE.         # Write WAVECAR for future calculations
-"""
-
 def calc_forces(atoms, regions):
     """Sets up and runs VASP calculation via a vasp.run script in the 
     run directory. Upon completion, updates atom forces. 
     """
-    # INCAR and POSCAR
-    f = open('{0}/INCAR'.format(run_dir), 'w')
-    f.write(incar_str)
-    f.close()
+    # POSCAR
     write_poscar(atoms,'{0}/POSCAR'.format(run_dir))
 
     cmd = 'cd {0} && ./vasp.run'.format(run_dir)

@@ -23,10 +23,9 @@ First, create two directories, vasp_run and lammps_run, in the breqm directory. 
 
 By default, this tool expects VASP to be run through PBS. Additionally, this tool expects LAMMPS to be run locally.
 
-For LAMMPS, this tool only writes a data file ('lammps.data') and an input file ('lammps.in') within lammps_run. Therefore, all other files necessary for LAMMPS (e.g. force fields, control, etc.) must be  provided by the user within the lammps_run directory. The user can control the LAMMPS input file by changing a string in lammps.py.
+For LAMMPS, this tool only writes a data file ('lammps.data').Therefore, all other files necessary for LAMMPS (e.g. input, force fields, control, etc.) must be  provided by the user within the lammps_run directory. 
 
-For VASP, this tool only writes a POSCAR and an INCAR within vasp_run. Again, all other files required by VASP (KPOINTS, POTCAR, etc.) must be provided by the user within the vasp_run directory. The INCAR can be modified by changing a string in vasp.py. 
-
+For VASP, this tool only writes a POSCAR within vasp_run. Again, all other files required by VASP (INCAR, KPOINTS, POTCAR, etc.) must be provided by the user within the vasp_run directory. 
 
 Running 
 --------

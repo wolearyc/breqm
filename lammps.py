@@ -6,44 +6,11 @@ from util import *
 
 run_dir = 'lammps_run' # Running directory
 
-input_str = """
-# LAMMPS Input File, written by Willis
-
-# General
-atom_modify     map hash
-units           real
-boundary        p p f
-atom_style      charge
-read_data       lammps.data
-timestep        0.25
-pair_style      reax/c lammps.control safezone 1.6 mincap 100
-pair_coeff      * * lammps.ffield H O
-fix             QEQ all qeq/reax 1 0.0 10.0 1.0e-6 reax/c
-group           overlap id 7 12 17 18 23 26 30 31 32 44 45 47 49 53 57 58 59 60 69 70 73 76 77 84 92 94 95 96 99 107 111 112 115 119 124 129 131 132 133 138 142 144
-
-# Neighbors
-neighbor        2.5 bin
-neigh_modify    delay 0 every 10 check no exclude group overlap overlap
-
-# Dumps
-dump dump_all all custom 100 lammps.trj id type x y z fx fy fz
-dump_modify dump_all sort id
-thermo_style custom step temp press ke pe etotal atoms
-thermo_modify flush yes
-thermo 1000
-
-# Compute forces
-run 0
-"""
-
 def calc_forces(atoms, regions):
     """Sets up and runs LAMMPS calculation via a lammps.run script in the 
     run directory. Upon completion, updates atom forces.
     """
-    # Input and data files
-    f = open('{0}/lammps.in'.format(run_dir), 'w')
-    f.write(input_str.format(" ".join(map(str, atoms.elements))))
-    f.close()
+    # data file
     write_data(atoms, '{0}/lammps.data'.format(run_dir))
 
     cmd = 'cd {0} && ./lammps.run'.format(run_dir)
