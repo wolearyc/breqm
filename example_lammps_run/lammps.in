@@ -1,0 +1,29 @@
+
+# LAMMPS Input File, written by Willis
+
+# General
+atom_modify     map hash
+units           real
+boundary        p p f
+atom_style      charge
+read_data       lammps.data
+timestep        0.25
+pair_style      reax/c lammps.control safezone 1.6 mincap 100
+
+# Format specifier is necessary! 
+pair_coeff      * * lammps.ffield H O
+
+fix             QEQ all qeq/reax 1 0.0 10.0 1.0e-6 reax/c
+neighbor        2.5 bin
+#neigh_modify    delay 0 every 10 check no exclude
+
+# Don't change the dump order!
+dump dump_all all custom 100 lammps.trj id type x y z fx fy fz
+
+dump_modify dump_all sort id
+thermo_style custom step temp press ke pe etotal atoms
+thermo_modify flush yes
+thermo 1000
+
+# Compute forces
+run 0

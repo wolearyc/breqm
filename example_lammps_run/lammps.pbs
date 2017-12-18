@@ -1,0 +1,16 @@
+#PBS -S /bin/tcsh
+#PBS -l walltime=00:01:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -j oe
+#PBS -o lammps.pbs.out
+#PBS -q cpu
+#PBS -N QMMM_LAMMPS
+
+# Set Working Directory
+cd $PBS_O_WORKDIR
+
+# run simulation
+mpirun -np 1 /ul/wolearyc/codes/lammps/src/lmp_mpi -in lammps.in > lammps.out
+
+
+

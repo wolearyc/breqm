@@ -1,0 +1,1 @@
+/ul/wolearyc/codes/lammps/src/lmp_serial -in lammps.in > lammps.out

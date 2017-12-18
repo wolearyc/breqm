@@ -1,0 +1,29 @@
+
+# VASP Input File, written by Willis
+System = forces
+
+# Parallelization
+NPAR     = 7            # sqrt(cores)
+
+# Electronic relaxation
+GGA      = PE            # Use PBE
+IVDW     = 12            # Use Becke-Johnson D3
+PREC     = Normal        # Normal precision
+ENCUT    = 400           # Planewave cutoff
+NELMIN   = 4             # Several electronic steps
+EDIFF    = 1.0E-5        # Low cutoff to avoid drift
+LREAL    = A             # Use real space projections
+ISMEAR   = 1             # Smearing (default)
+SIGMA    = 0.2           # Smearing parameter (default)
+ISPIN    = 1             # Closed shell calculation
+ALGO     = Very Fast     
+ISYM     = 0             # No symmetry
+MAXMIX   = 45            # Mixing
+
+# Ionic relaxation
+NSW = 0                  # Single point calculation
+ISIF = 0                 # No (expensive) stress calculation
+
+# Output
+LCHARG  = .FALSE.        
+LWAVE   = .TRUE.         # Write WAVECAR for future calculations

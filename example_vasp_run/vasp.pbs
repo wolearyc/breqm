@@ -1,0 +1,50 @@
+#PBS -S /bin/tcsh
+#PBS -l walltime=05:00:00
+#PBS -l nodes=1:ppn=7
+#PBS -j oe
+#PBS -o pbs.out
+#PBS -q qm
+#PBS -N BREQM_heat
+#PBS -l mem=64gb
+
+
+
+while (1)
+    sleep 1
+    if ( -e $PBS_O_WORKDIR/vasp.flag ) then
+        module load cuda/8.0
+        source /ul/haixiao/GCC/gcc-4.9.3-ion.csh
+        source /ul/haixiao/intel/bin/compilervars.csh intel64
+
+        set MPI=mpirun
+        set VASP=/net/hulk/home1/haixiao/VASP/vasp.5.4.4/vasp.5.4.4/bin/vasp_gpu
+
+        cd $PBS_O_WORKDIR
+
+        cat $PBS_NODEFILE > vasp.nodes
+
+# Determine the number of processors we were given
+        set nprocs = `wc -l < $PBS_NODEFILE`
+
+        echo "Setting up MPS..."
+        set node=`cat $PBS_NODEFILE | uniq`
+        set result=`ssh $node /ul/wolearyc/bin/setupMPS $PBS_JOBID`
+        if ($result == NONE_AVAILABLE) then
+            echo "MPS setup failed: Not enough GPUs."
+            exit
+        endif
+        echo "Running on GPUs:" $result > LOG
+
+# Unset this so VASP doesn't bypass MPI.
+        unsetenv CUDA_VISIBLE_DEVICES
+# Set these so VASP can locate server
+        setenv CUDA_MPS_PIPE_DIRECTORY /tmp/$PBS_JOBID/pipe
+        setenv CUDA_MPS_LOG_DIRECTORY /tmp/$PBS_JOBID/log
+
+        echo "Running..."
+        $MPI -machinefile $PBS_NODEFILE -np $nprocs $VASP >> LOG
+        echo "Done. Quitting MPS."
+        ssh $node /ul/wolearyc/bin/quitMPS $PBS_JOBID
+        rm $PBS_O_WORKDIR/vasp.flag
+    endif
+end
