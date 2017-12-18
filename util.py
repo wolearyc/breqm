@@ -10,8 +10,8 @@ def error(desc):
     """Prints an error and exits."""
     print 'ERROR: {0}'.format(desc)
     exit()
-
-def block_pbs(jobID)
+    
+def block_pbs(jobID):
     """Blocks until PBS job with jobID is complete."""
     block = True
     while block:

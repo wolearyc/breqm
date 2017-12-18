@@ -1,5 +1,6 @@
 # Author: Willis O'Leary
 
+import os
 import itertools
 import numpy as np
 from util import *
@@ -19,6 +20,11 @@ def calc_forces(atoms, regions):
 
     # For PBS: wait until job completes
     #block_pbs(jobID)
+    #block = True
+    #while block:
+    #    time.sleep(1)
+    #    block = os.path.isfile("vasp_run/vasp.flag") # flag does not exist when VASP finishes
+
 
     updt(atoms, run_dir, regions)
 
@@ -59,17 +65,26 @@ def updt(atoms, dir, regions):
     'id type x y z fx fy fz'. 
     """
     if atoms.forces is None:
-        atoms.forces = [None] * len(atoms)
+        atoms.forces = [None] * len(atoms)  
 
-    f = open('{0}/lammps.trj'.format(dir), 'r')
-    for _ in xrange(9):
-        next(f)
-    for i in xrange(len(atoms)):
-        nums = [float(n) for n in next(f).split()]
-        atoms.positions[i] = np.array(nums[2:5])
-        if not regions.fixed_mm(*atoms.positions[i]):       
-            atoms.forces[i] = np.array(nums[5:8]) * 4.184e-4
-    f.close()
+    try:
+        f = open('{0}/lammps.trj'.format(dir), 'r')
+        for _ in xrange(9):
+            next(f)
+        for i in xrange(len(atoms)):
+            nums = [float(n) for n in next(f).split()]
+            atoms.positions[i] = np.array(nums[2:5])
+            if not regions.fixed_mm(*atoms.positions[i]):       
+                atoms.forces[i] = np.array(nums[5:8]) * 4.184e-4
+        f.close()
+    except:
+        f = open('{0}/lammps.data'.format(dir), 'r')
+        for _ in xrange(17):
+            next(f)
+        for i in xrange(len(atoms)):
+            nums = [float(n) for n in next(f).split()]
+            atoms.positions[i] = np.array(nums[3:])
+        f.close()
 
 
 

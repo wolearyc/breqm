@@ -1,5 +1,7 @@
 # Author: Willis O'Leary
 
+import re
+import os
 import itertools
 import numpy as np
 from atoms import *
@@ -13,12 +15,19 @@ def calc_forces(atoms, regions):
     # POSCAR
     write_poscar(atoms,'{0}/POSCAR'.format(run_dir))
 
-    cmd = 'cd {0} && ./vasp.run'.format(run_dir)
-    p = Popen(cmd, stderr=STDOUT, stdout=PIPE,  shell=True)
-    jobID = p.communicate()[0]
+    #cmd = 'cd {0} && ./vasp.run'.format(run_dir)
+    #p = Popen(cmd, stderr=STDOUT, stdout=PIPE,  shell=True)
+    #jobID = p.communicate()[0]
+    
+    # A flag to indicate calc_forces was called to vasp.pbs // Collin
+    os.system("echo 'flag' > vasp_run/vasp.flag")
 
     # For PBS: wait until job completes
-    block_pbs(jobID)
+    #block_pbs(jobID)
+    block = True
+    while block:
+        time.sleep(1)
+        block = os.path.isfile("vasp_run/vasp.flag") # flag does not exist when VASP finishes
 
     updt(atoms, run_dir, regions)
 
@@ -129,7 +138,14 @@ def updt(atoms, dir, regions):
     next(f)
     for i in xrange(len(atoms)):
         if not regions.fixed_qm(*atoms.positions[i]):
-            nums = [float(s) for s in next(f).split()]
+            SplitLine = list(filter(None, re.split(r"\ |(-|[()])", next(f))))
+            FixedSplitLine = []
+            for j in range(len(SplitLine)):
+                if SplitLine[j] == '-':
+                    SplitLine[j+1] = -1 * float(SplitLine[j+1])
+                else:
+                    FixedSplitLine.append(float(SplitLine[j]))
+            nums = FixedSplitLine #[float(s) for s in splitLine]
             atoms.forces[i] = np.array(nums[3:]) * 0.00964895
     f.close()
 

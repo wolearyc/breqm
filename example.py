@@ -14,7 +14,7 @@ total = vasp.read_poscar('example_input.vasp')
 regions = ZIntervalRegions((0,13), (9,40), 11, cutoffs)
 
 # Run 2 ps heating dynamics
-# run_heating_md(total, regions, 1.2, 5, 1666, 50, 300, 20)
+run_heating_md(total, regions, 1.2, 5, 1666, 50, 300, 1.0)
 
 # Run 2 ps NVT dynamics
 # run_nvt_md(total, regions, 1.2, 5, 1666, 300.0, 1.0)
